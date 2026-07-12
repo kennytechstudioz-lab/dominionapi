@@ -16,7 +16,7 @@ export function buildEmailHtml(opts: EmailLayoutOptions): string {
     title,
     greeting,
     content,
-    companyName = process.env.EMAIL_FROM_NAME || "Capricorn Energy",
+    companyName = process.env.EMAIL_FROM_NAME || "Dominion Group",
     companyEmail = process.env.EMAIL_FROM_ADDRESS || "",
     year = new Date().getFullYear(),
   } = opts;

@@ -20,8 +20,8 @@ export async function sendDirectEmail(params: {
   }
 
   const { to, subject, greeting, content } = params;
-  const fromName = process.env.EMAIL_FROM_NAME || "Capricorn Energy";
-  const fromAddress = process.env.EMAIL_FROM_ADDRESS || "noreply@capricornenergyltd.online";
+  const fromName = process.env.EMAIL_FROM_NAME || "Dominion Group";
+  const fromAddress = process.env.EMAIL_FROM_ADDRESS || "noreply@dominiongroup.online";
 
   const html = buildEmailHtml({ title: subject, greeting, content });
   const resend = getResend();
@@ -89,8 +89,8 @@ export async function sendTemplatedEmail(params: {
     }
 
     const html = buildEmailHtml({ title: subject, greeting, content, bannerUrl });
-    const fromName = process.env.EMAIL_FROM_NAME || "Capricorn Energy";
-    const fromAddress = process.env.EMAIL_FROM_ADDRESS || "noreply@capricornenergyltd.online";
+    const fromName = process.env.EMAIL_FROM_NAME || "Dominion Group";
+    const fromAddress = process.env.EMAIL_FROM_ADDRESS || "noreply@dominiongroup.online";
 
     const resend = getResend();
     const { error } = await resend.emails.send({

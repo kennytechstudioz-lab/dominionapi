@@ -15,7 +15,7 @@ import { emitNotification } from "../utils/socket";
 import { sendTemplatedEmail } from "../utils/email";
 
 /**
- * Registers a new user on the Capricorn Energy Ltd platform.
+ * Registers a new user on the Dominion Group Ltd platform.
  * Validates payload parameters and hashes password elements.
  */
 export async function registerUser(req: Request, res: Response) {
@@ -144,9 +144,9 @@ export async function registerUser(req: Request, res: Response) {
       username: cleanUsername,
       templateName: "registration_successful",
       variables: { username: cleanUsername },
-      fallbackSubject: "Welcome to Capricorn Energy",
+      fallbackSubject: "Welcome to Dominion Group",
       fallbackGreeting: `Hi ${cleanUsername},`,
-      fallbackContent: `Your account has been successfully created on Capricorn Energy. You can now log in and start exploring our clean energy investment plans.`,
+      fallbackContent: `Your account has been successfully created on Dominion Group. You can now log in and start exploring our clean energy investment plans.`,
     }).catch((err) => console.error("[Email] Registration welcome email failed:", err));
 
     return res.status(201).json({
@@ -226,7 +226,7 @@ export async function loginUser(req: Request, res: Response) {
         username: user.username,
         templateName: "two_factor_auth",
         variables: { otp },
-        fallbackSubject: "Your 2FA Login Code — Capricorn Energy Ltd",
+        fallbackSubject: "Your 2FA Login Code — Dominion Group Ltd",
         fallbackGreeting: `Hi ${user.username},`,
         fallbackContent: `Your two-factor authentication code is: <strong style="font-size:28px; color:#e4c126; letter-spacing:8px;">${otp}</strong><br/><br/>This code expires in 10 minutes. Do not share it with anyone.`,
       }).catch((err) => console.error("[2FA] Email send error:", err));
@@ -722,21 +722,21 @@ export async function updateUserProfile(req: Request, res: Response) {
         await sendTemplatedNotification({
           username: user.username,
           templateName: "verification_processing",
-          variables: { username: user.username, company_name: "Capricorn Energy" },
+          variables: { username: user.username, company_name: "Dominion Group" },
           notifyAdmin: true,
           adminTitle: `KYC Submitted — @${user.username}`,
           adminContent: `User @${user.username} has submitted their KYC verification details and is awaiting review.`,
           fallbackTitle: "Verification Under Review",
-          fallbackContent: `Hello ${user.username}, thanks for the effort of verifying your Capricorn Energy account. Your verification is currently in review and will take 24 hours for review completion, you will be notified upon approval.`,
+          fallbackContent: `Hello ${user.username}, thanks for the effort of verifying your Dominion Group account. Your verification is currently in review and will take 24 hours for review completion, you will be notified upon approval.`,
         });
 
         sendTemplatedEmail({
           username: user.username,
           templateName: "verification_processing",
-          variables: { username: user.username, company_name: "Capricorn Energy" },
+          variables: { username: user.username, company_name: "Dominion Group" },
           fallbackSubject: "Verification Under Review",
           fallbackGreeting: `Hello ${user.username},`,
-          fallbackContent: `Thanks for the effort of verifying your <strong>Capricorn Energy</strong> account. Your verification is currently in review and will take 24 hours for review completion, you will be notified upon approval.`,
+          fallbackContent: `Thanks for the effort of verifying your <strong>Dominion Group</strong> account. Your verification is currently in review and will take 24 hours for review completion, you will be notified upon approval.`,
         });
       } catch (notifErr) {
         console.error("✗ Error sending verification_processing notification:", notifErr);
@@ -1482,9 +1482,9 @@ export async function adminBulkEmail(req: Request, res: Response) {
           username: String(username).toLowerCase().trim(),
           templateName: String(templateName),
           variables: {},
-          fallbackSubject: "Message from Capricorn Energy",
+          fallbackSubject: "Message from Dominion Group",
           fallbackGreeting: `Hello {{username}},`,
-          fallbackContent: "You have a new message from the Capricorn Energy team.",
+          fallbackContent: "You have a new message from the Dominion Group team.",
         })
       )
     );
@@ -1852,7 +1852,7 @@ export async function forgotPassword(req: Request, res: Response) {
       username: user.username,
       templateName: "forgot_password",
       variables: { otp },
-      fallbackSubject: "Your Password Reset Code — Capricorn Energy Ltd",
+      fallbackSubject: "Your Password Reset Code — Dominion Group Ltd",
       fallbackGreeting: `Hi ${user.username},`,
       fallbackContent: `Your password reset code is: <strong style="font-size:28px; color:#e4c126; letter-spacing:8px;">${otp}</strong><br/><br/>This code expires in 15 minutes. Do not share it with anyone.`,
     }).catch((err) => console.error("[ForgotPassword] Email send error:", err));

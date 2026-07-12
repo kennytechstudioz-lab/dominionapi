@@ -15,7 +15,7 @@ const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/oeelco
 
 async function runTests() {
   console.log("======================================================");
-  console.log(" CAPRICORN INTEGRATION TEST: ACTIVE DEPOSITS & EARNINGS");
+  console.log(" DOMINION INTEGRATION TEST: ACTIVE DEPOSITS & EARNINGS");
   console.log("======================================================");
 
   try {

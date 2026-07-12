@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildEmailHtml = buildEmailHtml;
 function buildEmailHtml(opts) {
-    const { logoUrl, bannerUrl, title, greeting, content, companyName = process.env.EMAIL_FROM_NAME || "Capricorn Energy", companyEmail = process.env.EMAIL_FROM_ADDRESS || "", year = new Date().getFullYear(), } = opts;
+    const { logoUrl, bannerUrl, title, greeting, content, companyName = process.env.EMAIL_FROM_NAME || "Dominion Group", companyEmail = process.env.EMAIL_FROM_ADDRESS || "", year = new Date().getFullYear(), } = opts;
     return `<!DOCTYPE html>
 <html lang="en">
 <head>

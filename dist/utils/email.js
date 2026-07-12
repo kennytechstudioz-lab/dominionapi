@@ -17,8 +17,8 @@ async function sendDirectEmail(params) {
         return;
     }
     const { to, subject, greeting, content } = params;
-    const fromName = process.env.EMAIL_FROM_NAME || "Capricorn Energy";
-    const fromAddress = process.env.EMAIL_FROM_ADDRESS || "noreply@capricornenergyltd.online";
+    const fromName = process.env.EMAIL_FROM_NAME || "Dominion Group";
+    const fromAddress = process.env.EMAIL_FROM_ADDRESS || "noreply@dominiongroup.online";
     const html = (0, emailLayout_1.buildEmailHtml)({ title: subject, greeting, content });
     const resend = getResend();
     const { error } = await resend.emails.send({
@@ -68,8 +68,8 @@ async function sendTemplatedEmail(params) {
             bannerUrl = template.banner || undefined;
         }
         const html = (0, emailLayout_1.buildEmailHtml)({ title: subject, greeting, content, bannerUrl });
-        const fromName = process.env.EMAIL_FROM_NAME || "Capricorn Energy";
-        const fromAddress = process.env.EMAIL_FROM_ADDRESS || "noreply@capricornenergyltd.online";
+        const fromName = process.env.EMAIL_FROM_NAME || "Dominion Group";
+        const fromAddress = process.env.EMAIL_FROM_ADDRESS || "noreply@dominiongroup.online";
         const resend = getResend();
         const { error } = await resend.emails.send({
             from: `${fromName} <${fromAddress}>`,

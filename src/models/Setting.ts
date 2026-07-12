@@ -4,17 +4,17 @@ const SettingSchema = new Schema(
   {
     companyName: {
       type: String,
-      default: "Capricorn Energy",
+      default: "Dominion Group",
       trim: true,
     },
     domainName: {
       type: String,
-      default: "capricorn.com",
+      default: "dominiongroup.online",
       trim: true,
     },
     email: {
       type: String,
-      default: "support@capricorn.com",
+      default: "support@dominiongroup.online",
       trim: true,
     },
     phone: {
@@ -29,7 +29,7 @@ const SettingSchema = new Schema(
     },
     description: {
       type: String,
-      default: "Capricorn Energy is a global leader in clean-energy investments, delivering sustainable and secured high-yield dividends.",
+      default: "Dominion Group is a global leader in clean-energy investments, delivering sustainable and secured high-yield dividends.",
       trim: true,
     },
     showCurrency: {

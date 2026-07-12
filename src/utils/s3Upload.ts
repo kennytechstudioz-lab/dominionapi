@@ -28,9 +28,9 @@ export async function uploadToS3(
   const bucketName = process.env.AWS_S3_BUCKET_NAME || "kenny-tech";
   const region = process.env.AWS_REGION || "us-east-1";
   
-  // Format clean bucket key under capricorn/ directory folder to avoid collision
+  // Format clean bucket key under dominion/ directory folder to avoid collision
   const cleanFileName = fileName.replace(/\s+/g, "_");
-  const key = `capricorn/${Date.now()}-${cleanFileName}`;
+  const key = `dominion/${Date.now()}-${cleanFileName}`;
 
   const command = new PutObjectCommand({
     Bucket: bucketName,

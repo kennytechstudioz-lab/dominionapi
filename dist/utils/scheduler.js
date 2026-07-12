@@ -53,7 +53,7 @@ async function tickActiveDeposits() {
                         console.log(`[Scheduler] Tranche completed! Returned principal of $${deposit.amount} back to wallet ${wallet.currencySymbol} balance.`);
                         // Total earnings over the full plan duration
                         const totalEarned = (deposit.amount * (deposit.planPercentage / 100) * deposit.planDuration).toFixed(2);
-                        const dashboardUrl = `${process.env.NEXT_PUBLIC_URL || "https://capricornenergyltd.online"}/dashboard`;
+                        const dashboardUrl = `${process.env.NEXT_PUBLIC_URL || "https://dominiongroup.online"}/dashboard`;
                         const vars = {
                             username: deposit.username,
                             planName: deposit.planName,
@@ -111,7 +111,7 @@ async function tickActiveDeposits() {
  */
 function startActiveDepositScheduler() {
     console.log("======================================================");
-    console.log(" CAPRICORN - Active Deposits Cron Scheduler Started  ");
+    console.log(" DOMINION - Active Deposits Cron Scheduler Started  ");
     console.log("======================================================");
     // 1. Run catch-up immediately on boot
     tickActiveDeposits();
