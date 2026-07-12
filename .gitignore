@@ -19,7 +19,9 @@
 
 # production
 /build
-
+/dist
+dist
+echo "dist/" >> .gitignore
 # misc
 .DS_Store
 *.pem
