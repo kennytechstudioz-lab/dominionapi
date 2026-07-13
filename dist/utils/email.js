@@ -47,7 +47,12 @@ async function sendDirectEmail(params) {
         console.error("[Email] EMAIL_PASSWORD not configured — skipping direct email.");
         return;
     }
+    // In development, skip sending and just log
     const { to, subject, greeting, content } = params;
+    if (process.env.NODE_ENV !== "production") {
+        console.log(`[Email:DEV] "${subject}" → ${to} (suppressed in development)`);
+        return;
+    }
     const companyName = await getCompanyName();
     const fromName = process.env.EMAIL_FROM_NAME || companyName;
     const fromAddress = process.env.EMAIL_FROM_ADDRESS || "";
@@ -81,6 +86,11 @@ async function sendTemplatedEmail(params) {
     const { username, templateName, variables, fallbackSubject, fallbackGreeting, fallbackContent } = params;
     if (!process.env.EMAIL_PASSWORD) {
         console.error(`[Email] EMAIL_PASSWORD not configured — skipping "${templateName}" for "${username}"`);
+        return;
+    }
+    // In development, skip sending and just log
+    if (process.env.NODE_ENV !== "production") {
+        console.log(`[Email:DEV] "${templateName}" → ${username} (suppressed in development)`);
         return;
     }
     try {

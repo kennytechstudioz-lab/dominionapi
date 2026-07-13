@@ -1050,13 +1050,15 @@ async function toggleUser2FA(req, res) {
 // Controller: Retrieve all transactions in the system for admin view
 async function getAllTransactionsForAdmin(req, res) {
     try {
-        const { page = "1", limit = "20" } = req.query;
+        const { page = "1", limit = "50", username } = req.query;
         const pageNum = Math.max(1, parseInt(String(page), 10) || 1);
-        const limitNum = Math.min(100, Math.max(1, parseInt(String(limit), 10) || 20));
+        const limitNum = Math.min(200, Math.max(1, parseInt(String(limit), 10) || 50));
         const skip = (pageNum - 1) * limitNum;
+        // Optional filter by username for admin user detail view
+        const query = username ? { username: { $regex: new RegExp("^" + String(username).trim() + "$", "i") } } : {};
         const [transactions, total] = await Promise.all([
-            Transaction_1.Transaction.find({}).sort({ createdAt: -1 }).skip(skip).limit(limitNum),
-            Transaction_1.Transaction.countDocuments({}),
+            Transaction_1.Transaction.find(query).sort({ createdAt: -1 }).skip(skip).limit(limitNum),
+            Transaction_1.Transaction.countDocuments(query),
         ]);
         return res.status(200).json({
             success: true,
@@ -1285,7 +1287,10 @@ async function getActiveDeposits(req, res) {
  */
 async function getAllActiveDepositsForAdmin(req, res) {
     try {
-        const activeDeposits = await ActiveDeposit_1.ActiveDeposit.find({}).sort({ createdAt: -1 });
+        const { username } = req.query;
+        // Optional filter by username for admin user detail view
+        const query = username ? { username: { $regex: new RegExp("^" + String(username).trim() + "$", "i") } } : {};
+        const activeDeposits = await ActiveDeposit_1.ActiveDeposit.find(query).sort({ createdAt: -1 });
         return res.status(200).json({ success: true, activeDeposits });
     }
     catch (error) {
