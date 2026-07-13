@@ -31,8 +31,12 @@ export async function uploadToS3(
   // Write file buffer to local disk synchronously
   fs.writeFileSync(filePath, fileBuffer);
 
+  // Prefer the explicit BASE_URL env variable (for VPS/proxy setups),
+  // fall back to the dynamic host derived from the incoming request (local dev)
+  const baseUrl = process.env.BASE_URL?.replace(/\/$/, "") || hostUrl;
+
   // Return the fully qualified HTTP path
-  return `${hostUrl}/uploads/${uniqueName}`;
+  return `${baseUrl}/uploads/${uniqueName}`;
 }
 
 /**
