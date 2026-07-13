@@ -37,6 +37,7 @@ import {
   verifyTwoFactorOtp,
   requestCapitalAccess,
   fundUserWallet,
+  adminUpdateUserWallet,
 } from "../controllers/userController";
 
 const router = Router();
@@ -47,6 +48,9 @@ router.get("/wallets", getUserWallets);
 
 // Route: PUT /api/users/wallets/address (Update wallet payout address)
 router.put("/wallets/address", updateUserWalletAddress);
+
+// Route: PUT /api/users/wallets/admin-update (Admin: update wallet address and/or balance)
+router.put("/wallets/admin-update", adminUpdateUserWallet);
 
 // Route: PUT /api/users/password (Change user password)
 router.put("/password", changeUserPassword);

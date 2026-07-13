@@ -1040,6 +1040,43 @@ export async function updateUserWalletAddress(req: Request, res: Response) {
   }
 }
 
+/**
+ * Admin: Update a user's wallet address and/or balance directly.
+ * PUT /api/users/wallets/admin-update
+ */
+export async function adminUpdateUserWallet(req: Request, res: Response) {
+  try {
+    const { walletId, address, balance } = req.body;
+
+    if (!walletId) {
+      return res.status(400).json({ success: false, error: "walletId is required." });
+    }
+
+    const wallet = await Wallet.findById(walletId);
+    if (!wallet) {
+      return res.status(404).json({ success: false, error: "Wallet not found." });
+    }
+
+    if (address !== undefined) wallet.address = String(address).trim();
+    if (balance !== undefined) {
+      const parsed = parseFloat(String(balance));
+      if (isNaN(parsed)) return res.status(400).json({ success: false, error: "Invalid balance value." });
+      wallet.balance = parsed;
+    }
+
+    await wallet.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `${wallet.currencySymbol} wallet updated successfully!`,
+      wallet,
+    });
+  } catch (error: any) {
+    console.error("✗ Error in adminUpdateUserWallet controller:", error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+}
+
 // Controller: Change user password
 export async function changeUserPassword(req: Request, res: Response) {
   try {

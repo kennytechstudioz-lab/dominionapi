@@ -7,6 +7,8 @@ const router = (0, express_1.Router)();
 router.get("/wallets", userController_1.getUserWallets);
 // Route: PUT /api/users/wallets/address (Update wallet payout address)
 router.put("/wallets/address", userController_1.updateUserWalletAddress);
+// Route: PUT /api/users/wallets/admin-update (Admin: update wallet address and/or balance)
+router.put("/wallets/admin-update", userController_1.adminUpdateUserWallet);
 // Route: PUT /api/users/password (Change user password)
 router.put("/password", userController_1.changeUserPassword);
 // Route: PUT /api/users/2fa (Toggle 2FA)
