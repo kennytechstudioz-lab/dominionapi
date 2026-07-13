@@ -5,6 +5,7 @@ exports.createStaff = createStaff;
 exports.updateStaff = updateStaff;
 exports.deleteStaff = deleteStaff;
 const Staff_1 = require("../models/Staff");
+const s3Upload_1 = require("../utils/s3Upload");
 async function getAllStaff(req, res) {
     const staff = await Staff_1.Staff.find().sort({ createdAt: -1 });
     return res.json({ success: true, staff });
@@ -29,8 +30,12 @@ async function updateStaff(req, res) {
         staff.position = String(position).trim();
     if (description !== undefined)
         staff.description = String(description).trim();
-    if (picture !== undefined)
+    if (picture !== undefined) {
+        // Delete old picture from disk if picture is being replaced
+        if (picture !== staff.picture && staff.picture)
+            (0, s3Upload_1.deleteLocalFile)(staff.picture);
         staff.picture = String(picture);
+    }
     await staff.save();
     return res.json({ success: true, staff });
 }
@@ -39,5 +44,8 @@ async function deleteStaff(req, res) {
     const staff = await Staff_1.Staff.findByIdAndDelete(id);
     if (!staff)
         return res.status(404).json({ error: "Staff member not found." });
+    // Delete associated picture from disk
+    if (staff.picture)
+        (0, s3Upload_1.deleteLocalFile)(staff.picture);
     return res.json({ success: true, message: "Staff member deleted." });
 }

@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.uploadToS3 = uploadToS3;
 exports.deleteFromS3 = deleteFromS3;
+exports.deleteLocalFile = deleteLocalFile;
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 /**
@@ -28,8 +29,11 @@ async function uploadToS3(fileBuffer, fileName, mimeType, hostUrl) {
     const filePath = path_1.default.join(uploadDir, uniqueName);
     // Write file buffer to local disk synchronously
     fs_1.default.writeFileSync(filePath, fileBuffer);
+    // Prefer the explicit BASE_URL env variable (for VPS/proxy setups),
+    // fall back to the dynamic host derived from the incoming request (local dev)
+    const baseUrl = process.env.BASE_URL?.replace(/\/$/, "") || hostUrl;
     // Return the fully qualified HTTP path
-    return `${hostUrl}/uploads/${uniqueName}`;
+    return `${baseUrl}/uploads/${uniqueName}`;
 }
 /**
  * Deletes a file from the local uploads directory given its public URL.
@@ -50,5 +54,33 @@ async function deleteFromS3(fileUrl) {
     catch (err) {
         console.error("Local file deletion error: ", err);
         throw err;
+    }
+}
+/**
+ * Silently deletes a local upload file given its URL.
+ * Only acts on local /uploads/ URLs — ignores external S3 or CDN links.
+ * Does not throw — safe to call without try/catch.
+ *
+ * @param fileUrl The fully qualified URL of the asset to remove
+ */
+function deleteLocalFile(fileUrl) {
+    if (!fileUrl)
+        return;
+    // Only process local upload URLs (skip old S3 or external CDN links)
+    if (!fileUrl.includes("/uploads/"))
+        return;
+    try {
+        const urlParts = fileUrl.split("/uploads/");
+        if (urlParts.length < 2)
+            return;
+        const fileName = decodeURIComponent(urlParts[1]);
+        const filePath = path_1.default.join(__dirname, "../../uploads", fileName);
+        if (fs_1.default.existsSync(filePath)) {
+            fs_1.default.unlinkSync(filePath);
+            console.log(`[Cleanup] Deleted orphaned upload: ${fileName}`);
+        }
+    }
+    catch (err) {
+        console.error("[Cleanup] Failed to delete local file:", err);
     }
 }

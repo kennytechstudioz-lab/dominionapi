@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { Blog } from "../models/Blog";
+import { deleteLocalFile } from "../utils/s3Upload";
 
 function getAbbreviation(title: string): string {
   const cleanTitle = title.trim();
@@ -82,6 +83,11 @@ export async function updateBlog(req: Request, res: Response) {
     blog.set("abbreviation", getAbbreviation(title));
   }
   
+  // Delete old picture from disk if picture is being replaced
+  if (picture !== undefined && picture !== blog.picture && blog.picture) {
+    deleteLocalFile(blog.picture);
+  }
+
   await blog.save();
   return res.json({ success: true, blog });
 }
@@ -92,5 +98,7 @@ export async function deleteBlog(req: Request, res: Response) {
   const { id } = req.params;
   const blog = await Blog.findByIdAndDelete(id);
   if (!blog) return res.status(404).json({ error: "Blog post not found." });
+  // Delete associated picture from disk
+  if (blog.picture) deleteLocalFile(blog.picture);
   return res.json({ success: true, message: "Blog post deleted." });
 }

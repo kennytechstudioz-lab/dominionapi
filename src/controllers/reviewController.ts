@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Review } from "../models/Review";
 import { User } from "../models/User";
+import { deleteLocalFile } from "../utils/s3Upload";
 
 // Helper function to resolve flag emoji from country name
 function getFlagEmoji(countryName: string): string {
@@ -169,7 +170,11 @@ export async function updateReview(req: Request, res: Response) {
     if (rating !== undefined) review.rating = Math.min(5, Math.max(1, Number(rating)));
     if (country !== undefined) review.country = country;
     if (countryFlag !== undefined) review.countryFlag = countryFlag;
-    if (userPicture !== undefined) review.userPicture = userPicture;
+    if (userPicture !== undefined) {
+      // Delete old picture from disk if userPicture is being replaced
+      if (userPicture !== review.userPicture && review.userPicture) deleteLocalFile(review.userPicture);
+      review.userPicture = userPicture;
+    }
 
     await review.save();
 
@@ -193,6 +198,9 @@ export async function deleteReview(req: Request, res: Response) {
     if (!review) {
       return res.status(404).json({ error: "Review not found." });
     }
+
+    // Delete associated picture from disk
+    if (review.userPicture) deleteLocalFile(review.userPicture);
 
     return res.status(200).json({
       success: true,

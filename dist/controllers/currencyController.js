@@ -5,6 +5,7 @@ exports.createCurrency = createCurrency;
 exports.updateCurrency = updateCurrency;
 exports.deleteCurrency = deleteCurrency;
 const Currency_1 = require("../models/Currency");
+const s3Upload_1 = require("../utils/s3Upload");
 // Action: Retrieve all active currencies
 async function getCurrencies(req, res) {
     try {
@@ -82,6 +83,9 @@ async function updateCurrency(req, res) {
             currency.symbol = symbol.trim().toUpperCase();
         }
         if (image !== undefined) {
+            // Delete old image from disk if image is being replaced
+            if (image !== currency.image && currency.image)
+                (0, s3Upload_1.deleteLocalFile)(currency.image);
             currency.image = image ? image.trim() : "";
         }
         if (address) {
@@ -114,6 +118,9 @@ async function deleteCurrency(req, res) {
             });
         }
         await currency.deleteOne();
+        // Delete associated image from disk
+        if (currency.image)
+            (0, s3Upload_1.deleteLocalFile)(currency.image);
         return res.status(200).json({
             success: true,
             message: "Currency successfully removed from system.",

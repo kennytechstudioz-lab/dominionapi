@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { Currency } from "../models/Currency";
+import { deleteLocalFile } from "../utils/s3Upload";
 
 // Action: Retrieve all active currencies
 export async function getCurrencies(req: Request, res: Response) {
@@ -86,6 +87,8 @@ export async function updateCurrency(req: Request, res: Response) {
       currency.symbol = symbol.trim().toUpperCase();
     }
     if (image !== undefined) {
+      // Delete old image from disk if image is being replaced
+      if (image !== currency.image && currency.image) deleteLocalFile(currency.image);
       currency.image = image ? image.trim() : "";
     }
     if (address) {
@@ -122,6 +125,9 @@ export async function deleteCurrency(req: Request, res: Response) {
     }
 
     await currency.deleteOne();
+
+    // Delete associated image from disk
+    if (currency.image) deleteLocalFile(currency.image);
 
     return res.status(200).json({
       success: true,

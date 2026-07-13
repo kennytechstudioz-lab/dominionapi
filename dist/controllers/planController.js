@@ -5,6 +5,7 @@ exports.getPlans = getPlans;
 exports.updatePlan = updatePlan;
 exports.deletePlan = deletePlan;
 const Plan_1 = require("../models/Plan");
+const s3Upload_1 = require("../utils/s3Upload");
 // Controller: Create a new investment plan
 async function createPlan(req, res) {
     try {
@@ -89,6 +90,10 @@ async function updatePlan(req, res) {
                 });
             }
         }
+        // Delete old image from disk if picture is being replaced
+        if (picture !== undefined && picture !== plan.picture && plan.picture) {
+            (0, s3Upload_1.deleteLocalFile)(plan.picture);
+        }
         // Update fields
         if (name)
             plan.name = name.trim();
@@ -132,6 +137,9 @@ async function deletePlan(req, res) {
                 error: "Investment plan not found.",
             });
         }
+        // Delete associated image from disk
+        if (plan.picture)
+            (0, s3Upload_1.deleteLocalFile)(plan.picture);
         return res.status(200).json({
             success: true,
             message: "Investment plan deleted successfully!",

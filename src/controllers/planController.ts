@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { Plan } from "../models/Plan";
+import { deleteLocalFile } from "../utils/s3Upload";
 
 // Controller: Create a new investment plan
 export async function createPlan(req: Request, res: Response) {
@@ -114,6 +115,11 @@ export async function updatePlan(req: Request, res: Response) {
       }
     }
 
+    // Delete old image from disk if picture is being replaced
+    if (picture !== undefined && picture !== plan.picture && plan.picture) {
+      deleteLocalFile(plan.picture);
+    }
+
     // Update fields
     if (name) plan.name = name.trim();
     if (percent !== undefined) plan.percent = Number(percent);
@@ -150,6 +156,9 @@ export async function deletePlan(req: Request, res: Response) {
         error: "Investment plan not found.",
       });
     }
+
+    // Delete associated image from disk
+    if (plan.picture) deleteLocalFile(plan.picture);
 
     return res.status(200).json({
       success: true,

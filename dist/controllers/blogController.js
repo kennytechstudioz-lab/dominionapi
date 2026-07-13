@@ -6,6 +6,7 @@ exports.createBlog = createBlog;
 exports.updateBlog = updateBlog;
 exports.deleteBlog = deleteBlog;
 const Blog_1 = require("../models/Blog");
+const s3Upload_1 = require("../utils/s3Upload");
 function getAbbreviation(title) {
     const cleanTitle = title.trim();
     if (cleanTitle.toLowerCase().includes("caspian sea"))
@@ -95,6 +96,10 @@ async function updateBlog(req, res) {
     else if (title !== undefined && blog.category === "Project" && !blog.get("abbreviation")) {
         blog.set("abbreviation", getAbbreviation(title));
     }
+    // Delete old picture from disk if picture is being replaced
+    if (picture !== undefined && picture !== blog.picture && blog.picture) {
+        (0, s3Upload_1.deleteLocalFile)(blog.picture);
+    }
     await blog.save();
     return res.json({ success: true, blog });
 }
@@ -103,5 +108,8 @@ async function deleteBlog(req, res) {
     const blog = await Blog_1.Blog.findByIdAndDelete(id);
     if (!blog)
         return res.status(404).json({ error: "Blog post not found." });
+    // Delete associated picture from disk
+    if (blog.picture)
+        (0, s3Upload_1.deleteLocalFile)(blog.picture);
     return res.json({ success: true, message: "Blog post deleted." });
 }

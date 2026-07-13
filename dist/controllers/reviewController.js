@@ -9,6 +9,7 @@ exports.updateReview = updateReview;
 exports.deleteReview = deleteReview;
 const Review_1 = require("../models/Review");
 const User_1 = require("../models/User");
+const s3Upload_1 = require("../utils/s3Upload");
 // Helper function to resolve flag emoji from country name
 function getFlagEmoji(countryName) {
     if (!countryName)
@@ -176,8 +177,12 @@ async function updateReview(req, res) {
             review.country = country;
         if (countryFlag !== undefined)
             review.countryFlag = countryFlag;
-        if (userPicture !== undefined)
+        if (userPicture !== undefined) {
+            // Delete old picture from disk if userPicture is being replaced
+            if (userPicture !== review.userPicture && review.userPicture)
+                (0, s3Upload_1.deleteLocalFile)(review.userPicture);
             review.userPicture = userPicture;
+        }
         await review.save();
         return res.status(200).json({
             success: true,
@@ -198,6 +203,9 @@ async function deleteReview(req, res) {
         if (!review) {
             return res.status(404).json({ error: "Review not found." });
         }
+        // Delete associated picture from disk
+        if (review.userPicture)
+            (0, s3Upload_1.deleteLocalFile)(review.userPicture);
         return res.status(200).json({
             success: true,
             message: "Review deleted successfully.",

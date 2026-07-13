@@ -60,3 +60,28 @@ export async function deleteFromS3(fileUrl: string): Promise<void> {
     throw err;
   }
 }
+
+/**
+ * Silently deletes a local upload file given its URL.
+ * Only acts on local /uploads/ URLs — ignores external S3 or CDN links.
+ * Does not throw — safe to call without try/catch.
+ *
+ * @param fileUrl The fully qualified URL of the asset to remove
+ */
+export function deleteLocalFile(fileUrl: string | undefined | null): void {
+  if (!fileUrl) return;
+  // Only process local upload URLs (skip old S3 or external CDN links)
+  if (!fileUrl.includes("/uploads/")) return;
+  try {
+    const urlParts = fileUrl.split("/uploads/");
+    if (urlParts.length < 2) return;
+    const fileName = decodeURIComponent(urlParts[1]);
+    const filePath = path.join(__dirname, "../../uploads", fileName);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+      console.log(`[Cleanup] Deleted orphaned upload: ${fileName}`);
+    }
+  } catch (err) {
+    console.error("[Cleanup] Failed to delete local file:", err);
+  }
+}
