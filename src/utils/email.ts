@@ -33,6 +33,27 @@ async function getCompanyName(): Promise<string> {
 }
 
 /**
+ * Returns true if email sending should be suppressed.
+ * Suppressed when:
+ *   - EMAIL_PASSWORD is not set (no credentials), OR
+ *   - SUPPRESS_EMAIL=true is explicitly set in .env
+ *
+ * NOTE: NODE_ENV is intentionally NOT used here because the VPS may not set it
+ * to "production", and we always want to send when credentials are present.
+ */
+function isEmailSuppressed(label: string): boolean {
+  if (!process.env.EMAIL_PASSWORD) {
+    console.warn(`[Email] EMAIL_PASSWORD not set — skipping "${label}"`);
+    return true;
+  }
+  if (process.env.SUPPRESS_EMAIL === "true") {
+    console.log(`[Email:SUPPRESSED] "${label}" (SUPPRESS_EMAIL=true)`);
+    return true;
+  }
+  return false;
+}
+
+/**
  * Sends an email directly to any address without requiring a registered user lookup.
  * Used for contact form inquiries and other outbound emails to arbitrary recipients.
  */
@@ -42,17 +63,9 @@ export async function sendDirectEmail(params: {
   greeting: string;
   content: string;
 }) {
-  if (!process.env.EMAIL_PASSWORD) {
-    console.error("[Email] EMAIL_PASSWORD not configured — skipping direct email.");
-    return;
-  }
-
-  // In development, skip sending and just log
   const { to, subject, greeting, content } = params;
-  if (process.env.NODE_ENV !== "production") {
-    console.log(`[Email:DEV] "${subject}" → ${to} (suppressed in development)`);
-    return;
-  }
+
+  if (isEmailSuppressed(`direct → ${to}`)) return;
 
   const companyName = await getCompanyName();
   const fromName = process.env.EMAIL_FROM_NAME || companyName;
@@ -79,9 +92,9 @@ export async function sendDirectEmail(params: {
       subject: compiledSubject,
       html,
     });
-    console.log(`[Email] Direct email sent to ${to} — subject: "${compiledSubject}"`);
+    console.log(`[Email] ✓ Direct email sent to ${to} — subject: "${compiledSubject}"`);
   } catch (err: any) {
-    console.error(`[Email] Failed to send direct email to "${to}":`, err.message);
+    console.error(`[Email] ✗ Failed to send direct email to "${to}":`, err.message);
     throw new Error(err.message);
   }
 }
@@ -96,16 +109,7 @@ export async function sendTemplatedEmail(params: {
 }) {
   const { username, templateName, variables, fallbackSubject, fallbackGreeting, fallbackContent } = params;
 
-  if (!process.env.EMAIL_PASSWORD) {
-    console.error(`[Email] EMAIL_PASSWORD not configured — skipping "${templateName}" for "${username}"`);
-    return;
-  }
-
-  // In development, skip sending and just log
-  if (process.env.NODE_ENV !== "production") {
-    console.log(`[Email:DEV] "${templateName}" → ${username} (suppressed in development)`);
-    return;
-  }
+  if (isEmailSuppressed(`${templateName} → ${username}`)) return;
 
   try {
     const user = await User.findOne({ username: { $regex: new RegExp("^" + username.trim() + "$", "i") } });
@@ -142,8 +146,8 @@ export async function sendTemplatedEmail(params: {
       html,
     });
 
-    console.log(`[Email] "${templateName}" sent to ${user.email}`);
+    console.log(`[Email] ✓ "${templateName}" sent to ${user.email}`);
   } catch (err) {
-    console.error(`[Email] Failed to send "${templateName}" for user "${username}":`, err);
+    console.error(`[Email] ✗ Failed to send "${templateName}" for user "${username}":`, err);
   }
 }
