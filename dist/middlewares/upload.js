@@ -13,7 +13,7 @@ const storage = multer_1.default.memoryStorage();
 exports.upload = (0, multer_1.default)({
     storage,
     limits: {
-        fileSize: 5 * 1024 * 1024, // Strict 5MB limit for clean uploads
+        fileSize: 50 * 1024 * 1024, // Strict 50MB limit for clean uploads
     },
     fileFilter: (req, file, cb) => {
         if (file.mimetype.startsWith("image/") || file.mimetype === "application/pdf") {

@@ -5,63 +5,50 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.uploadToS3 = uploadToS3;
 exports.deleteFromS3 = deleteFromS3;
-const client_s3_1 = require("@aws-sdk/client-s3");
-const dotenv_1 = __importDefault(require("dotenv"));
-dotenv_1.default.config();
-// Initialize the Amazon S3 Client with security credentials from environmental keys
-const s3Client = new client_s3_1.S3Client({
-    region: process.env.AWS_REGION || "us-east-1",
-    credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID || "",
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "",
-    },
-});
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
 /**
- * Uploads a raw file buffer directly to the configured AWS S3 bucket.
+ * Uploads a raw file buffer directly to the local uploads directory.
  *
  * @param fileBuffer The binary file buffer from multer memory storage
- * @param fileName Original file name to append to the S3 bucket path key
- * @param mimeType Targeted file mimetype (e.g. image/jpeg, image/png)
- * @returns The fully qualified, public-accessible HTTPS S3 URL on success
+ * @param fileName Original file name
+ * @param mimeType Targeted file mimetype
+ * @param hostUrl The base protocol and host of the server (e.g. http://localhost:5002)
+ * @returns The fully qualified public URL path to access the file
  */
-async function uploadToS3(fileBuffer, fileName, mimeType) {
-    const bucketName = process.env.AWS_S3_BUCKET_NAME || "kenny-tech";
-    const region = process.env.AWS_REGION || "us-east-1";
-    // Format clean bucket key under dominion/ directory folder to avoid collision
+async function uploadToS3(fileBuffer, fileName, mimeType, hostUrl) {
+    const uploadDir = path_1.default.join(__dirname, "../../uploads");
+    // Ensure local uploads directory exists
+    if (!fs_1.default.existsSync(uploadDir)) {
+        fs_1.default.mkdirSync(uploadDir, { recursive: true });
+    }
+    // Format clean file name to avoid spacing collisions
     const cleanFileName = fileName.replace(/\s+/g, "_");
-    const key = `dominion/${Date.now()}-${cleanFileName}`;
-    const command = new client_s3_1.PutObjectCommand({
-        Bucket: bucketName,
-        Key: key,
-        Body: fileBuffer,
-        ContentType: mimeType,
-        ACL: "public-read", // Requests public read permissions for standard assets
-    });
-    await s3Client.send(command);
-    // Return the public HTTPS URL for the uploaded media asset
-    return `https://${bucketName}.s3.${region}.amazonaws.com/${key}`;
+    const uniqueName = `${Date.now()}-${cleanFileName}`;
+    const filePath = path_1.default.join(uploadDir, uniqueName);
+    // Write file buffer to local disk synchronously
+    fs_1.default.writeFileSync(filePath, fileBuffer);
+    // Return the fully qualified HTTP path
+    return `${hostUrl}/uploads/${uniqueName}`;
 }
 /**
- * Deletes an object from the S3 bucket given its public URL link.
+ * Deletes a file from the local uploads directory given its public URL.
  *
- * @param fileUrl The fully qualified public HTTPS S3 URL of the asset
+ * @param fileUrl The fully qualified public HTTP URL of the asset
  */
 async function deleteFromS3(fileUrl) {
     try {
-        const bucketName = process.env.AWS_S3_BUCKET_NAME || "kenny-tech";
-        // Extract key after the AWS domain link endpoint
-        const urlParts = fileUrl.split(".amazonaws.com/");
+        const urlParts = fileUrl.split("/uploads/");
         if (urlParts.length < 2)
             return;
-        const key = decodeURIComponent(urlParts[1]);
-        const command = new client_s3_1.DeleteObjectCommand({
-            Bucket: bucketName,
-            Key: key,
-        });
-        await s3Client.send(command);
+        const fileName = decodeURIComponent(urlParts[1]);
+        const filePath = path_1.default.join(__dirname, "../../uploads", fileName);
+        if (fs_1.default.existsSync(filePath)) {
+            fs_1.default.unlinkSync(filePath);
+        }
     }
     catch (err) {
-        console.error("AWS S3 Deletion Error: ", err);
+        console.error("Local file deletion error: ", err);
         throw err;
     }
 }

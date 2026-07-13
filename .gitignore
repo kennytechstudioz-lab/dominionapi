@@ -21,7 +21,10 @@
 /build
 /dist
 dist
-echo "dist/" >> .gitignore
+
+# local uploads
+/uploads/
+
 # misc
 .DS_Store
 *.pem

@@ -8,6 +8,9 @@ const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const http_1 = require("http");
+const path_1 = __importDefault(require("path"));
+const fs_1 = __importDefault(require("fs"));
+const multer_1 = __importDefault(require("multer"));
 const socket_1 = require("./utils/socket");
 const db_1 = require("./config/db");
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
@@ -31,7 +34,14 @@ const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5002;
 // Set up server middlewares
 app.use((0, cors_1.default)());
-app.use(express_1.default.json({ limit: "10mb" }));
+app.use(express_1.default.json({ limit: "50mb" }));
+app.use(express_1.default.urlencoded({ limit: "50mb", extended: true }));
+// Ensure local uploads folder exists on startup
+const uploadDir = path_1.default.join(__dirname, "../uploads");
+if (!fs_1.default.existsSync(uploadDir)) {
+    fs_1.default.mkdirSync(uploadDir, { recursive: true });
+}
+app.use("/uploads", express_1.default.static(uploadDir));
 // Premium request logger middleware (Registered first to capture all paths)
 app.use((req, res, next) => {
     const timestamp = new Date().toLocaleString();
@@ -81,6 +91,31 @@ app.get("/api/health", (req, res) => {
             status: dbStatusStr,
         },
         timestamp: new Date().toISOString(),
+    });
+});
+// Global Express Error-handling middleware
+app.use((err, req, res, next) => {
+    if (err instanceof multer_1.default.MulterError) {
+        if (err.code === "LIMIT_FILE_SIZE") {
+            return res.status(400).json({
+                success: false,
+                error: "Uploaded file is too large. Maximum allowed size is 50MB.",
+            });
+        }
+        return res.status(400).json({
+            success: false,
+            error: err.message,
+        });
+    }
+    if (err.type === "entity.too.large" || err.status === 413) {
+        return res.status(413).json({
+            success: false,
+            error: "Payload request is too large. Maximum allowed size is 50MB.",
+        });
+    }
+    res.status(err.status || 500).json({
+        success: false,
+        error: err.message || "An unexpected server error occurred.",
     });
 });
 // Create standard Node HTTP Server
