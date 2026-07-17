@@ -29,7 +29,7 @@ export async function getSettings(req: Request, res: Response) {
  */
 export async function updateSettings(req: Request, res: Response) {
   try {
-    const { companyName, domainName, email, phone, address, description, showCurrency, registrationLink, documents, mapEmbed } = req.body;
+    const { companyName, domainName, email, phone, address, description, showCurrency, registrationLink, documents, mapEmbed, certificateUrl } = req.body;
 
     let setting = await Setting.findOne({});
     if (!setting) {
@@ -47,6 +47,7 @@ export async function updateSettings(req: Request, res: Response) {
     if (registrationLink !== undefined) (setting as any).registrationLink = String(registrationLink).trim();
     if (documents !== undefined) (setting as any).documents = documents;
     if (mapEmbed !== undefined) (setting as any).mapEmbed = String(mapEmbed);
+    if (certificateUrl !== undefined) (setting as any).certificateUrl = String(certificateUrl).trim();
 
     await setting.save();
 

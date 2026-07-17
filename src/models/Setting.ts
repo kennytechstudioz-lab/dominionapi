@@ -45,11 +45,17 @@ const SettingSchema = new Schema(
       type: String,
       default: "",
     },
+    certificateUrl: {
+      type: String,
+      default: "",
+      trim: true,
+    },
     documents: {
       type: [
         {
           name: { type: String, default: "" },
           url: { type: String, default: "" },
+          language: { type: String, default: "" },
         },
       ],
       default: [],
