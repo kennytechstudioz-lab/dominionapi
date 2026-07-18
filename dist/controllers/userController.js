@@ -650,6 +650,7 @@ async function getUserProfile(req, res) {
                 isVerified: user.isVerified || false,
                 idType: user.idType || "",
                 idImage: user.idImage || "",
+                twoFactorEnabled: user.twoFactorEnabled || false,
             },
         });
     }
@@ -754,6 +755,7 @@ async function updateUserProfile(req, res) {
                 isVerified: user.isVerified || false,
                 idType: user.idType || "",
                 idImage: user.idImage || "",
+                twoFactorEnabled: user.twoFactorEnabled || false,
             },
         });
     }
