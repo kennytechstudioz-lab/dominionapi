@@ -34,15 +34,12 @@ const TransactionSchema = new mongoose_1.Schema({
     },
     planDuration: {
         type: Number,
-        required: true,
     },
     planPercentage: {
         type: Number,
-        required: true,
     },
     planReferralPercent: {
         type: Number,
-        required: true,
     },
     amount: {
         type: Number,
