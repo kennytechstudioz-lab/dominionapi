@@ -33,12 +33,15 @@ const TransactionSchema = new Schema(
     },
     planDuration: {
       type: Number,
+      required: false,
     },
     planPercentage: {
       type: Number,
+      required: false,
     },
     planReferralPercent: {
       type: Number,
+      required: false,
     },
     amount: {
       type: Number,
